@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "imports",
+  "label": "Imports",
+  "description": "Manage FlexiPort.ai pipeline imports",
+  "fields": {
+    "name": {
+      "type": "string",
+      "default": {
+        "$formula": "string(now())"
+      }
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "external_pipeline_id": {
+      "type": "string"
+    },
+    "access_key": {
+      "type": "string",
+      "required": true
+    },
+    "api_url": {
+      "type": "string",
+      "description": "Advanced override for the FlexiPort integrations API base URL. When set, it wins over any base URL inlined in access_key via the '<key>@<url>' form. Defaults to production (e.g. http://localhost:3010/integrations/v1)."
+    },
+    "system_status": {
+      "type": "string",
+      "enum": [
+        "syncing",
+        "pending",
+        "processing",
+        "completed",
+        "error"
+      ],
+      "default": "syncing"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "start_approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "files_count": {
+      "type": "number"
+    },
+    "files_processed": {
+      "type": "link",
+      "url": "/imports:files?parent_id={id}&status=completed"
+    },
+    "files_processed_count": {
+      "type": "number",
+      "formula": "files_processed.count"
+    },
+    "date_completed": {
+      "type": "date"
+    },
+    "image_rehost_product_page": {
+      "type": "number",
+      "default": 1,
+      "description": "Cursor for the non-workflow image rehosting pass over imported products."
+    },
+    "image_rehost_category_page": {
+      "type": "number",
+      "default": 1,
+      "description": "Cursor for the non-workflow image rehosting pass over imported categories."
+    },
+    "image_rehost_processed_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of source images uploaded to Swell CDN for this import."
+    },
+    "image_rehost_error_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of image URLs the rehosting pass could not fetch or upload."
+    },
+    "image_rehost_products_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "image_rehost_categories_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "date_images_completed": {
+      "type": "date",
+      "description": "Set when all completed product/category files for this import have been scanned for external images."
+    },
+    "files": {
+      "fields": {
+        "id": {
+          "auto": true,
+          "type": "objectid"
+        },
+        "external_id": {
+          "type": "string",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string",
+          "required": true
+        },
+        "current_page": {
+          "type": "number"
+        },
+        "page_size": {
+          "type": "number",
+          "description": "FlexiPort page size used for this file's current run. Stored so a deployed tuning change cannot alter resume offsets mid-file."
+        },
+        "claim_token": {
+          "type": "string",
+          "description": "Opaque token for the workflow attempt that currently owns this file."
+        },
+        "claim_started_at": {
+          "type": "date",
+          "description": "When the current processing claim was acquired."
+        },
+        "workflow_id": {
+          "type": "string",
+          "description": "Durable import workflow instance id processing this file."
+        },
+        "workflow_started_at": {
+          "type": "date",
+          "description": "When the workflow instance was created for the current claim."
+        },
+        "description": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "number",
+          "default": 0
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "queued",
+            "processing",
+            "failed",
+            "completed"
+          ],
+          "default": "pending"
+        },
+        "error_message": {
+          "type": "string"
+        },
+        "processed_records_count": {
+          "type": "number",
+          "default": 0
+        },
+        "total_records_count": {
+          "type": "number",
+          "default": 0
+        },
+        "ignored_records_count": {
+          "type": "number",
+          "default": 0,
+          "description": "Total ignored records for this file. Written from per-page counts; details live in ignored-records."
+        },
+        "ignored_records": {
+          "type": "array",
+          "value_type": "object",
+          "description": "Legacy bounded sample only. Full ignored-record details are stored in ignored-records.",
+          "fields": {
+            "id": {
+              "type": "objectid",
+              "auto": true,
+              "immutable": true
+            },
+            "page": {
+              "type": "number",
+              "description": "Source page that produced this ignored record; lets a retried page replace its own entries idempotently."
+            }
+          }
+        },
+        "ignored_pages": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Deprecated staging field retained for compatibility; do not store bulk ignored rows here."
+        },
+        "ignored_page_counts": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Per-page ignored counts keyed by page number. Bounded by page count and written idempotently via dotted $set."
+        },
+        "completion_percentage": {
+          "type": "float",
+          "formula": "if(total_records_count > 0, processed_records_count / total_records_count * 100, 0)",
+          "scale": 2
+        },
+        "date_completed": {
+          "type": "date"
+        }
+      },
+      "events": {
+        "types": [
+          {
+            "id": "created"
+          },
+          {
+            "id": "updated"
+          },
+          {
+            "id": "deleted"
+          }
+        ]
+      },
+      "type": "collection"
+    }
+  },
+  "events": {
+    "types": [
+      {
+        "id": "created"
+      },
+      {
+        "id": "updated"
+      },
+      {
+        "id": "deleted"
+      }
+    ]
+  }
+}

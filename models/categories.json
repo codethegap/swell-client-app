@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "categories",
+  "fields": {
+    "import_id": {
+      "type": "objectid",
+      "description": "FlexiPort import (apps/flexiport_client_app/imports) this category was created by."
+    }
+  }
+}

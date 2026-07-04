@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "image-cache",
+  "label": "Image Cache",
+  "plural": "Image Cache",
+  "description": "Maps source image URLs to already-uploaded Swell file ids so import retries do not rehost the same image repeatedly.",
+  "fields": {
+    "source_url": {
+      "type": "string",
+      "required": true
+    },
+    "file_id": {
+      "type": "objectid",
+      "required": true
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "content_type": {
+      "type": "string"
+    },
+    "length": {
+      "type": "number"
+    },
+    "md5": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    }
+  }
+}

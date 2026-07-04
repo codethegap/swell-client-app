@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json.swell.store/content.json",
+  "collection": "imports",
+  "label": "Imports",
+  "description": "Manage FlexiPort.ai pipeline imports",
+  "fields": [
+    {
+      "id": "name",
+      "label": "Task Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "run_id",
+      "label": "Flexiport Pipe ID",
+      "type": "text",
+      "readonly": true
+    },
+    {
+      "id": "external_pipeline_id",
+      "label": "External Pipe ID",
+      "type": "text",
+      "readonly": true
+    },
+    {
+      "id": "access_key",
+      "label": "Flexiport Pipe Access Key",
+      "type": "text",
+      "required": true,
+      "description": "Pipe access key. To target a non-production pipeline, append the base URL after an '@', e.g. run_abc@https://your-tunnel.trycloudflare.com"
+    },
+    {
+      "id": "error_message",
+      "label": "Error",
+      "type": "text",
+      "readonly": true,
+      "conditions": {
+        "system_status": {
+          "$in": ["error"]
+        }
+      }
+    },
+    {
+      "id": "start_approved",
+      "type": "toggle",
+      "label": "Start Importing",
+      "description": "When enabled, the import will begin after saving. Use this toggle to stop a running import task.",
+      "conditions": {
+        "system_status": {
+          "$in": ["pending", "processing"]
+        }
+      }
+    },
+    {
+      "id": "files_count",
+      "label": "Flexiport Data",
+      "type": "text",
+      "readonly": true,
+      "conditions": {
+        "system_status": {
+          "$nin": ["syncing", "error"]
+        }
+      }
+    },
+    {
+      "id": "date_completed",
+      "label": "Completed at",
+      "type": "date",
+      "readonly": true,
+      "conditions": {
+        "system_status": {
+          "$in": ["completed"]
+        }
+      }
+    },
+    {
+      "id": "files",
+      "label": "Flexiport Data",
+      "type": "child_collection",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text"
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "text"
+        },
+        {
+          "id": "status",
+          "label": "Processing Status",
+          "type": "select",
+          "description": "Current processing status of the imported file",
+          "default": "pending",
+          "options": [
+            {
+              "label": "New",
+              "value": "pending"
+            },
+            {
+              "label": "Processing",
+              "value": "processing"
+            },
+            {
+              "label": "Processing",
+              "value": "queued"
+            },
+            {
+              "label": "Failed",
+              "value": "failed"
+            },
+            {
+              "label": "Completed",
+              "value": "completed"
+            }
+          ]
+        },
+        {
+          "id": "completion_percentage",
+          "label": "Progress, %",
+          "type": "number",
+          "conditions": {
+            "status": {
+              "$in": ["processing"]
+            }
+          }
+        },
+        {
+          "id": "ignored_records_count",
+          "label": "Ignored",
+          "type": "number",
+          "conditions": {
+            "status": {
+              "$in": ["processing", "completed"]
+            }
+          }
+        },
+        {
+          "id": "date_completed",
+          "label": "Completed at",
+          "type": "date",
+          "conditions": {
+            "status": {
+              "$in": ["completed"]
+            }
+          }
+        }
+      ],
+      "conditions": {
+        "system_status": { "$in": ["pending", "processing", "completed"] }
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "list",
+      "nav": {
+        "label": "FlexiPort.ai"
+      },
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name"
+        },
+        {
+          "id": "run_id",
+          "label": "Pipeline ID"
+        },
+        {
+          "id": "system_status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            {
+              "label": "Syncing",
+              "value": "syncing"
+            },
+            {
+              "label": "Pending",
+              "value": "pending"
+            },
+            {
+              "label": "In Progress",
+              "value": "processing"
+            },
+            {
+              "label": "Completed",
+              "value": "completed"
+            },
+            {
+              "label": "Error",
+              "value": "error"
+            }
+          ]
+        },
+        {
+          "id": "files_count",
+          "label": "Files"
+        },
+        {
+          "id": "date_created",
+          "label": "Created"
+        },
+        {
+          "id": "date_completed",
+          "label": "Completed at"
+        }
+      ],
+      "tabs": []
+    },
+    {
+      "id": "edit",
+      "fields": [
+        {
+          "id": "name"
+        },
+        {
+          "id": "run_id"
+        },
+        {
+          "id": "access_key"
+        },
+        {
+          "id": "error_message"
+        },
+        {
+          "id": "start_approved"
+        },
+        {
+          "id": "files",
+          "readonly": true
+        }
+      ],
+      "tabs": []
+    },
+    {
+      "id": "new",
+      "fields": [
+        {
+          "id": "name"
+        },
+        {
+          "id": "access_key"
+        }
+      ],
+      "tabs": []
+    }
+  ]
+}

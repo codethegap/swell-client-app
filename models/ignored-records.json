@@ -1,0 +1,47 @@
+{
+    "$schema": "https://json.swell.store/model.json",
+  "collection": "ignored-records",
+  "label": "Ignored Import Record",
+  "plural": "Ignored Import Records",
+  "description": "Per-row records skipped during a FlexiPort import. Stored separately from import files so a large bad import cannot exceed the parent record size limit.",
+  "fields": {
+    "import_id": {
+      "type": "objectid",
+      "required": true,
+      "description": "Owning import id."
+    },
+    "import": {
+      "type": "link",
+      "model": "apps/flexiport_client_app/imports",
+      "key": "import_id"
+    },
+    "file_id": {
+      "type": "objectid",
+      "required": true,
+      "description": "Owning import file id."
+    },
+    "page": {
+      "type": "number",
+      "required": true
+    },
+    "source_key": {
+      "type": "string",
+      "required": true,
+      "description": "Stable per-page key used for deterministic upserts."
+    },
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string",
+      "required": true
+    },
+    "details": {
+      "type": "string",
+      "description": "Stringified and truncated diagnostic details."
+    }
+  }
+}

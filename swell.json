@@ -1,0 +1,8 @@
+{
+  "description": "Something special",
+  "id": "flexiport_client_app",
+  "name": "flexiport-client-app",
+  "type": "admin",
+  "version": "1.0.0",
+  "permissions": []
+}
