@@ -6,12 +6,14 @@ export const config: SwellConfig = {
 };
 
 const DEFAULT_IMAGE_LIMIT = 5;
-const FLEXIPORT_INSTALLED_APP_ID = "6a453267354fa30012344fe5";
 
 export default async function (req: SwellRequest) {
   const importId = req.data?.import_id || req.data?.importId;
   const maxImages = Number(req.data?.limit || DEFAULT_IMAGE_LIMIT);
-  const appId = appQueryId(req);
+  const appId = req.appId;
+  if (!appId) {
+    throw new SwellError("Missing app id in request context");
+  }
 
   if (importId) {
     return rehostImportImages(req.swell, {
@@ -45,19 +47,4 @@ export default async function (req: SwellRequest) {
     });
     return;
   }
-}
-
-function appQueryId(req: SwellRequest): string {
-  const context = req.context as any;
-  const candidates = [
-    context?.installedAppId,
-    context?.installed_app_id,
-    context?.app?.id,
-    req.appId,
-  ];
-  return candidates.find(isObjectIdLike) || FLEXIPORT_INSTALLED_APP_ID;
-}
-
-function isObjectIdLike(value: unknown): value is string {
-  return typeof value === "string" && /^[a-f0-9]{24}$/.test(value);
 }

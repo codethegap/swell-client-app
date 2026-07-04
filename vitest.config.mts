@@ -98,6 +98,7 @@ export default defineConfig({
   plugins: [
     cloudflareTest({
       miniflare: {
+        compatibilityDate: "2026-07-02",
         bindings: {
           SWELL_STORE_ID: sdkAuth.storeId,
           SWELL_SESSION_ID: sdkAuth.sessionId,

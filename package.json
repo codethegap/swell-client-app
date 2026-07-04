@@ -1,5 +1,5 @@
 {
-  "description": "Something special",
+  "description": "Import products, categories, customers, and orders from FlexiPort.ai pipelines into your Swell store.",
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.16.20",
     "@swell/app-types": "^1.2.0",

@@ -1,5 +1,5 @@
 {
-  "description": "Something special",
+  "description": "Import products, categories, customers and orders from FlexiPort.ai",
   "id": "flexiport_client_app",
   "name": "flexiport-client-app",
   "type": "admin",

@@ -35,12 +35,13 @@ describe("rehostImportImages", () => {
         return null;
       }
       if (url === "/products") {
-        expect(query["$app.app_1.import_id"]).toBe("import_1");
+        expect(query["$app.app_1.import_id"]).toBeUndefined();
         return {
           page_count: 1,
           results: [
             {
               id: "prod_1",
+              $app: { app_1: { import_id: "import_1" } },
               images: [{ id: "img_1", caption: "Main", file: { url: "https://source.test/p.jpg" } }],
               options: [
                 {
@@ -53,6 +54,12 @@ describe("rehostImportImages", () => {
                   ],
                 },
               ],
+            },
+            {
+              // Not from this import — must be skipped, not rehosted.
+              id: "prod_other",
+              $app: { app_1: { import_id: "other_import" } },
+              images: [{ id: "img_x", file: { url: "https://source.test/other.jpg" } }],
             },
           ],
         };
@@ -68,12 +75,13 @@ describe("rehostImportImages", () => {
         };
       }
       if (url === "/categories") {
-        expect(query["$app.app_1.import_id"]).toBe("import_1");
+        expect(query["$app.app_1.import_id"]).toBeUndefined();
         return {
           page_count: 1,
           results: [
             {
               id: "cat_1",
+              $app: { app_1: { import_id: "import_1" } },
               images: [{ id: "img_4", file: { url: "https://source.test/category.jpg" } }],
             },
           ],
@@ -166,6 +174,7 @@ describe("rehostImportImages", () => {
         },
       }),
     );
+    expect(put).not.toHaveBeenCalledWith("/products/prod_other", expect.anything());
     expect(put).toHaveBeenCalledWith(
       "/imports/import_1",
       expect.objectContaining({

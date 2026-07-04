@@ -110,6 +110,12 @@ export async function rehostImportImages(
     await swell.put(`/imports/${importId}`, { $set: updates, $events: false });
   }
 
+  console.log(
+    `rehost import=${importId} processed=${budget.processed} errors=${budget.errors} ` +
+      `products=${productsCompleted ? "done" : `page ${updates.image_rehost_product_page ?? "-"}`} ` +
+      `categories=${categoriesCompleted ? "done" : `page ${updates.image_rehost_category_page ?? "-"}`}`,
+  );
+
   return {
     processed: budget.processed,
     errors: budget.errors,
@@ -128,12 +134,14 @@ async function processProducts(
   }: { importId: string; appId: string; page: number; budget: ImageBudget },
 ): Promise<{ nextPage: number; completed: boolean }> {
   let currentPage = Math.max(1, page);
-  const whereKey = `$app.${appId}.import_id`;
 
   while (budget.remaining > 0) {
+    // Full records (no `fields`): the projection cannot include `$app` (Mongo
+    // rejects `$`-prefixed field paths), and `$app.<id>` query filters use a
+    // store-specific storage key we cannot know portably. So we page the whole
+    // collection and match this import's records client-side via the
+    // slug-keyed `$app` object that every response carries.
     const result = await swell.get("/products", {
-      [whereKey]: importId,
-      fields: ["id", "images", "options"],
       limit: PRODUCT_PAGE_LIMIT,
       page: currentPage,
     });
@@ -144,6 +152,7 @@ async function processProducts(
 
     for (const product of products) {
       if (budget.remaining <= 0) break;
+      if (!belongsToImport(product, appId, importId)) continue;
 
       const set: Record<string, unknown> = {};
       const images = await rehostImageList(swell, product.images, budget);
@@ -183,12 +192,10 @@ async function processCategories(
   }: { importId: string; appId: string; page: number; budget: ImageBudget },
 ): Promise<{ nextPage: number; completed: boolean }> {
   let currentPage = Math.max(1, page);
-  const whereKey = `$app.${appId}.import_id`;
 
   while (budget.remaining > 0) {
+    // Full records + client-side match — see the note in processProducts.
     const result = await swell.get("/categories", {
-      [whereKey]: importId,
-      fields: ["id", "images"],
       limit: CATEGORY_PAGE_LIMIT,
       page: currentPage,
     });
@@ -199,6 +206,7 @@ async function processCategories(
 
     for (const category of categories) {
       if (budget.remaining <= 0) break;
+      if (!belongsToImport(category, appId, importId)) continue;
 
       const images = await rehostImageList(swell, category.images, budget);
       if (images.changed) {
@@ -322,6 +330,16 @@ async function rehostImageList(
   }
 
   return { changed, value: nextImages };
+}
+
+/**
+ * Whether a standard-collection record was written by this import. App
+ * extension values always serialize in responses as `$app.<app_id>.*` keyed by
+ * the app's string id, which is stable across stores (unlike the `$app` query
+ * key, which is a per-store installed-app ObjectId).
+ */
+function belongsToImport(record: any, appId: string, importId: string): boolean {
+  return record?.$app?.[appId]?.import_id === importId;
 }
 
 async function listImportFiles(swell: SwellAPI, importId: string): Promise<any[]> {

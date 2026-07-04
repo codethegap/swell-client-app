@@ -10,8 +10,8 @@ describe("createOrders", () => {
         expect(query.email.$in).toContain("b@example.com");
         return { results: [{ id: "acc_a", email: "a@example.com" }] };
       }
-      if (url === "/accounts/a@example.com/id") return "acc_a";
-      if (url === "/accounts/b@example.com/id") return null;
+      if (url === "/accounts/a%40example.com/id") return "acc_a";
+      if (url === "/accounts/b%40example.com/id") return null;
       if (url === "/accounts") return { results: [] };
       if (url === "/products:variants") {
         expect(query.sku.$in).toContain("VAR-1");

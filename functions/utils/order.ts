@@ -203,7 +203,7 @@ function buildRecalculateData(data: Record<string, unknown>): Record<string, unk
 }
 
 async function fetchAccountId(swell: SwellAPI, email: string): Promise<string | null> {
-  const direct = await swell.get(`/accounts/${email}/id`);
+  const direct = await swell.get(`/accounts/${encodeURIComponent(email)}/id`);
   if (direct) {
     return direct;
   }
